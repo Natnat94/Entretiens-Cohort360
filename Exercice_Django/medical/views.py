@@ -1,9 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 
-from .models import Patient, Medication
-from .filters import PatientFilter, MedicationFilter
-from .serializers import PatientSerializer, MedicationSerializer
+from .filters import MedicationFilter, PatientFilter, PrescriptionFilter
+from .models import Medication, Patient, Prescription
+from .serializers import (MedicationSerializer, PatientSerializer,
+                          PrescriptionSerializer)
 
 
 class PatientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,3 +23,16 @@ class MedicationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Medication.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = MedicationFilter
+
+
+class PrescriptionViewSet(mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
+    """ Creation, modification et lecture des préscritions avec filtrage via query params. """
+    serializer_class = PrescriptionSerializer
+    queryset = Prescription.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PrescriptionFilter
+

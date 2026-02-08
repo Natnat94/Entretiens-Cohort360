@@ -1,6 +1,7 @@
 import django_filters
+from django.db.models import Q
 
-from .models import Patient, Medication
+from .models import Medication, Patient, Prescription
 
 
 class PatientFilter(django_filters.FilterSet):
@@ -34,3 +35,21 @@ class MedicationFilter(django_filters.FilterSet):
     class Meta:
         model = Medication
         fields = ["code", "label", "status"]
+
+
+class PrescriptionFilter(django_filters.FilterSet):
+    medication = django_filters.CharFilter(field_name="medication__label", lookup_expr="icontains")
+    patient = django_filters.CharFilter(method="filter_patient")
+
+    def filter_patient(self, queryset, name, value):
+        return queryset.filter(Q(patient__last_name__icontains=value) | Q(patient__first_name__icontains=value))
+
+    class Meta:
+        model = Prescription
+        fields = {
+            "starting_date": ["exact", "lte", "gte"],
+            "ending_date": ["exact", "lte", "gte"],
+            "medication": ["exact"],
+            "patient": ["exact"],
+            "status": ["exact"],
+        }
